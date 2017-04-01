@@ -12,27 +12,48 @@ app.config(function($locationProvider, $routeProvider) {
     });
     $locationProvider.html5Mode(true);
 });
-app.controller('LandingController', function($scope, Facebook, Google, Linkedin) {
+app.controller('LandingController', function($scope, Facebook, Google, $http) {
+    var fbData = {};
     $scope.loginWithFb = function() {
         Facebook.login().then(function(response) {
             console.log(response)
+            fbData = response.authResponse;
             Facebook.getData().then(function(response) {
                 console.log(response);
+                fbData.detail = response;
+                console.log(fbData)
+                $http({
+                    url: 'api/login',
+                    method: 'POST',
+                    data: {
+                        socialObj: fbData,
+                        login_via: 'facebook'
+                    }
+                }).then(function(response) {
+                    console.log(response)
+                })
+
             })
         }, function(response) {});
     }
     $scope.loginWithGp = function() {
         Google.onSignIn().then(function(response) {
             console.log(response)
+            $http({
+                url: 'api/login',
+                method: 'POST',
+                data: {
+                    socialObj: response,
+                    login_via: 'google'
+                }
+            }).then(function(response) {
+                console.log(response)
+            })
         });
     }
-    $scope.loginWithLi = function() {
-        Linkedin.getData().then(function(response) {
-            console.log(response)
-        });
-    }
+
 });
-app.controller('Landing2Controller', function($scope, $http,$q) {
+app.controller('Landing2Controller', function($scope, $http, $q) {
 
     var movies = [{
         'title': 'Beauty and the Beast',
@@ -75,47 +96,61 @@ app.controller('Landing2Controller', function($scope, $http,$q) {
         'Distributor': 'DreamWorks',
         'Worldwide_gross': '$254,212,245'
     }];
+
     function getmovieData(name) {
-        return $q(function(resolve,reject){
+        return $q(function(resolve, reject) {
             $http({
                 url: 'http://www.omdbapi.com/',
-                params:{
-                    s:name
+                params: {
+                    s: name
                 },
                 method: 'GET'
             }).then(function(response) {
                 //console.log(response)
-                if(response.data.Search){
+                if (response.data.Search) {
                     var imagepath = response.data.Search[0].Poster;
                     resolve(imagepath);
-                }else{
+                } else {
                     reject('not found')
                 }
-            },function(resp){
+            }, function(resp) {
                 reject(resp);
             })
-        });        
+        });
     }
-    movies.map(function(item){
-        getmovieData(item.title).then(function(img){
-            item.image=img;
-        },function(resp){
-            item.image='n/a';
+    movies.map(function(item) {
+        getmovieData(item.title).then(function(img) {
+            item.image = img;
+        }, function(resp) {
+            item.image = 'n/a';
             console.log(resp)
         });
         return item;
     })
 
-    
+
     $scope.movieDetails = movies;
 
     var count = 10;
-    $scope.vote = function(){
-        count--;
+    $scope.vote = function(moviename) {
+        console.log(moviename)
+        var obj = {};
         console.log(count)
-        if(count == 0){
-            alert("voting done")
+        if (count == 1) {
+            obj.voteCompleted = true;
         }
+        obj.movieName = moviename;
+        obj.vote = count;
+
+        console.log(obj)
+        $http({
+            url: 'api/vote',
+            method: 'POST',
+            data: obj
+        }).then(function(response) {
+            console.log(response)
+        })
+        count--;
     }
 
 
