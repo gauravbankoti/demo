@@ -35,19 +35,12 @@ router.route('/vote')
         }
 
         user.update({ _id: req.body._id }, setdata).exec().then(function(data) {
-
-        }).catch(function(err) {
-
-        })
-
-        movie.update({ movieName: req.body.movieName }, { $inc: { votes: req.body.votes } }, { upsert: true }).exec().then(function(data) {
-
+            return movie.update({ movieName: req.body.movieName }, { $inc: { votes: req.body.vote } }, { upsert: true }).exec()
         }).then(function(updata) {
             res.send({ success: true })
         }).catch(function(err) {
             res.send({ success: false, message: err })
         })
-
     })
 
 module.exports = router;
