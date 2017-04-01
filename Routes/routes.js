@@ -8,7 +8,7 @@ var movie = require('../models/movie')
 router.route('/login')
     .post(function(req, res) {
 
-        var login = new userlogin()
+        var login = new user()
         login.socialObj = req.body.socialObj
         login.login_via = req.body.login_via
 
