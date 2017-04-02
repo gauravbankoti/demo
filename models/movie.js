@@ -6,4 +6,4 @@ var loginSchema = mongoose.Schema({
     votes               	:       { type: Number ,default:0}
 
 });
-module.exports = mongoose.model('login', loginSchema);
+module.exports = mongoose.model('movie', loginSchema);

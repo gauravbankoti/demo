@@ -12,7 +12,7 @@ app.config(function($locationProvider, $routeProvider) {
     });
     $locationProvider.html5Mode(true);
 });
-app.controller('LandingController', function($scope, Facebook, Google, $http) {
+app.controller('LandingController', function($scope, Facebook, Google, $http, $location,$rootScope) {
     var fbData = {};
     $scope.loginWithFb = function() {
         Facebook.login().then(function(response) {
@@ -30,6 +30,10 @@ app.controller('LandingController', function($scope, Facebook, Google, $http) {
                         login_via: 'facebook'
                     }
                 }).then(function(response) {
+                    if (response.data.success) {
+                        $rootScope.id = response.data.data._id;
+                        $location.path('/vote');
+                    }
                     console.log(response)
                 })
 
@@ -48,12 +52,17 @@ app.controller('LandingController', function($scope, Facebook, Google, $http) {
                 }
             }).then(function(response) {
                 console.log(response)
+
+                if (response.data.success) {
+                    $rootScope.id = response.data.data._id;
+                    $location.path('/vote');
+                }
             })
         });
     }
 
 });
-app.controller('Landing2Controller', function($scope, $http, $q) {
+app.controller('Landing2Controller', function($scope, $http, $q,$rootScope) {
 
     var movies = [{
         'title': 'Beauty and the Beast',
@@ -141,8 +150,9 @@ app.controller('Landing2Controller', function($scope, $http, $q) {
         }
         obj.movieName = moviename;
         obj.vote = count;
+        obj._id =$rootScope.id;
 
-        console.log(obj)
+            console.log(obj)
         $http({
             url: 'api/vote',
             method: 'POST',
